@@ -50,12 +50,12 @@
    str->spec read* read-syntax* values))
 
 ; handler for actually performing the reading
-(define (read-curly-contents c in srcloc line-num col-num position)
+(define (read-curly-contents c in src line-num col-num position)
   (define contents
     ; disallow nested curly functions
     (parameterize ([current-readtable (make-curly-readtable (current-readtable)
                                                             handle-nesting-error)])
-      (read-syntax/recursive (object-name in) in #\{)))
+      (read-syntax/recursive src in #\{)))
   ; parse-curly-fn does all the heavy lifting
   (parse-curly-fn contents))
 
