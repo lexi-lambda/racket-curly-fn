@@ -1,8 +1,6 @@
 #lang scribble/manual
 
-@(require racket/sandbox
-          scribble/eval
-          scribble/bnf
+@(require scribble/bnf
           (for-label racket/base racket/list racket/function
                      curly-fn))
 
