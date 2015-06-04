@@ -1,9 +1,17 @@
 #lang racket/base
 
-(require racket/list
-         racket/match
-         racket/syntax
-         racket/function)
+(require
+  (for-meta -3 racket/base)
+  (for-meta -2 racket/base)
+  (for-meta -1 racket/base)
+  (for-meta 1 racket/base)
+  (for-meta 2 racket/base)
+  (for-meta 3 racket/base)
+  (for-meta 4 racket/base)
+  racket/list
+  racket/match
+  racket/syntax
+  racket/function)
 
 (provide parse-curly-fn)
 
