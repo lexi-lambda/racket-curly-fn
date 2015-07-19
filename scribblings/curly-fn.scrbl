@@ -49,13 +49,12 @@ included in the body, then the syntax becomes a shorthand for @racket[curry].
 
 @section{Caveats}
 
-The shorthand is expanded to @racket[lambda] at read-time, not expansion-time. This means that
-identifiers are inspected as-is at read time, before any macros have a chance to manipulate the
-syntax.
-
-Additionally, the shorthand syntax may not be nested. This is mostly to avoid complications when
-considering the issue of argument identifier scope within nested functions, since those bindings are
-introduced unhygienically by inspection of the datums at read-time.
+The shorthand is expanded to @racket[lambda] by inspecting the datums within the function body. This
+inspection step occurs @emph{before} subexpressions are expanded. This means that identifiers are
+inspected as-is at read time, before any macros have a chance to manipulate the syntax. This is
+probably a good thing, since it reduces the possibility of identifiers being lost or introduced via
+syntax transformation, but it does mean it isn't possible to write a macro that expands to @racket[%]
+or other identifiers and have those identifiers detected by the curly shorthand.
 
 @section{Using the Curly Function Reader}
 

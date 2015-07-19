@@ -1,8 +1,15 @@
 #lang racket/base
 
-(require (for-syntax racket/base)
+(require (for-meta -3 racket/base)
+         (for-meta -2 racket/base)
+         (for-meta -1 racket/base)
+         (for-meta  1 racket/base)
+         (for-meta  2 racket/base)
+         (for-meta  3 racket/base)
+         (for-meta  4 racket/base)
+         racket/syntax
          syntax/module-reader
-         curly-fn/private/curly-parser)
+         curly-fn/private/curly-fn-transformer)
 
 (provide make-curly-fn-readtable
          (rename-out [-read read]
@@ -27,9 +34,10 @@
 
 ; a customized read-syntax function to attach the 'module-language property to use the custom curly-fn
 ; language info
+(define curly-fn-introducer (make-syntax-introducer #t))
 (define ((read-syntax* r) . args)
   (define read-syntax (read* r))
-  (let* ([stx (apply read-syntax args)]
+  (let* ([stx (curly-fn-introducer (apply read-syntax args))]
          [old-prop (syntax-property stx 'module-language)]
          [new-prop `#(curly-fn/lang/language-info get-language-info ,old-prop)])
     (syntax-property stx 'module-language new-prop)))
@@ -51,13 +59,11 @@
 
 ; handler for actually performing the reading
 (define (read-curly-contents c in src line-num col-num position)
-  (define contents
-    ; disallow nested curly functions
-    (parameterize ([current-readtable (make-curly-readtable (current-readtable)
-                                                            handle-nesting-error)])
-      (read-syntax/recursive src in #\{)))
-  ; parse-curly-fn does all the heavy lifting
-  (parse-curly-fn contents))
+  (with-syntax ([contents (curly-fn-introducer (read-syntax/recursive src in #\{))])
+    (curly-fn-introducer
+     #'(let ()
+         (local-require curly-fn/private/curly-fn-transformer)
+         (curly-fn contents)))))
 
 ; error handler to trap nested curly function forms
 (define (handle-nesting-error c in srcloc line-num col-num position)
