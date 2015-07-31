@@ -1,14 +1,16 @@
 #lang scribble/manual
 
 @(require scribble/bnf
+          scribble-code-examples
           (for-label racket/base racket/list racket/function
                      curly-fn))
 
-@(define-syntax-rule (fn args ...)
-   (elem (racketparenfont @tt{#})
-         (racket {args ...})))
-
-@(define >> @tt{>})
+@(define (curly-fn-examples . stuff)
+   (apply code-examples
+          #:lang "curly-fn racket"
+          #:show-lang-line @elem{@hash-lang[] @racketmodname[curly-fn] @racketmodname[racket]}
+          #:context #'here
+          stuff))
 
 @title{Reader Function Literal Shorthand}
 
@@ -31,21 +33,18 @@ with @litchar{%}.
  @item{@litchar{%&} is a rest argument.}
  @item{@litchar{%:} @nonterm{id} is a keyword argument.}]
 
-@(racketmod
-  curly-fn #,(racketmodname racket/base)
-  #,>> (@#,fn[list 1 % 3] 2)
-  #,(racketresult '(1 2 3))
-  #,>> (map @#,fn[- % 4] (range 9))
-  #,(racketresult '(-4 -3 -2 -1 0 1 2 3 4))
-  #,>> (@#,fn[apply list %&] 'a 'b 'c)
-  #,(racketresult '(a b c)))
+@curly-fn-examples|{
+(#{list 1 % 3} 2)
+(map #{- % 4} (range 9))
+(#{apply list %&} 'a 'b 'c)
+}|
 
 As a special case, if the shorthand syntax is used, but no arguments prefixed with @litchar{%} are
 included in the body, then the syntax becomes a shorthand for @racket[curry].
 
-@(racketblock
-  #,>> (map @#,fn[+ 2] (range 10))
-  #,(racketresult '(2 3 4 5 6 7 8 9 10 11)))
+@curly-fn-examples|{
+(map #{+ 2} (range 10))
+}|
 
 @section{Caveats}
 
