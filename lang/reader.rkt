@@ -64,8 +64,3 @@
      #'(let ()
          (local-require curly-fn/private/curly-fn-transformer)
          (curly-fn contents)))))
-
-; error handler to trap nested curly function forms
-(define (handle-nesting-error c in srcloc line-num col-num position)
-  (raise-syntax-error 'curly-fn "nesting curly function forms is not permitted"
-                      (read-syntax/recursive (object-name in) in #\{)))
