@@ -14,7 +14,8 @@ before_install:
   - export PATH="${RACKET_DIR}/bin:${PATH}"
 
 install:
-  - raco pkg install --deps search-auto --name curly-fn --link $TRAVIS_BUILD_DIR
+  - raco pkg install --auto --name curly-fn --link $TRAVIS_BUILD_DIR
+  - raco pkg install --auto cover cover-coveralls
 
 before_script:
 
