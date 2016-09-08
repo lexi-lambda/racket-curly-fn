@@ -1,14 +1,14 @@
 #lang racket/base
 
 (require racket/function
-         syntax/parse/define
          (for-syntax (except-in racket/base
                                 let let*)
                      racket/list
                      (rename-in racket/match
                                 [match-let let]
                                 [match-let* let*])
-                     racket/syntax))
+                     racket/syntax
+                     syntax/parse))
 
 (provide curly-fn)
 
@@ -57,35 +57,36 @@
        (argument-info 0 #f (list k))]
       [_ argument-info-null])))
 
-(define-syntax-parser curly-fn
-  [(_ terms)
-   (let* ([terms-stx #'terms]
-          [(argument-info max-positional has-rest? keywords)
-           (find-arguments terms-stx)])
-     (cond
-       [(or (> max-positional 0) has-rest? (not (empty? keywords)))
-        (with-syntax
-            (; the positional args are based from 1, so these are generated from %1 to %n
-             [(positional-arg ...)
-              (for/list ([i (in-range max-positional)])
-                (format-id terms-stx #:source terms-stx "%~a" (add1 i)))]
-             ; the rest arg is simple and can be handled as the tail of the formals list
-             [rest-arg (if has-rest? (datum->syntax terms-stx '%& terms-stx) '())]
-             ; keyword arguments need to be pairs of keywords and argument names
-             [(keyword-arg ...)
-              (append* (for/list ([kw (in-list keywords)])
-                         (list kw (format-id terms-stx #:source terms-stx
-                                             "%:~a" (keyword->string kw)))))]
-             ; the body is just the original syntax passed in
-             [body terms-stx]
-             ; finally, % needs to be an alias for %1, which is handled with an inner (let ...) block
-             [(aliases ...)
-              (if (>= max-positional 1)
-                  `([,(datum->syntax terms-stx '% terms-stx)
-                     ,(datum->syntax terms-stx '%1 terms-stx)])
-                  '())])
-          #'(lambda (positional-arg ... keyword-arg ... . rest-arg)
-              (let (aliases ...) body)))]
-       [else
-        (with-syntax ([(fn . body) terms-stx])
-          #'((curry fn) . body))]))])
+(define-syntax curly-fn
+  (syntax-parser
+    [(_ terms)
+     (let* ([terms-stx #'terms]
+            [(argument-info max-positional has-rest? keywords)
+             (find-arguments terms-stx)])
+       (cond
+         [(or (> max-positional 0) has-rest? (not (empty? keywords)))
+          (with-syntax
+              (; the positional args are based from 1, so these are generated from %1 to %n
+               [(positional-arg ...)
+                (for/list ([i (in-range max-positional)])
+                  (format-id terms-stx #:source terms-stx "%~a" (add1 i)))]
+               ; the rest arg is simple and can be handled as the tail of the formals list
+               [rest-arg (if has-rest? (datum->syntax terms-stx '%& terms-stx) '())]
+               ; keyword arguments need to be pairs of keywords and argument names
+               [(keyword-arg ...)
+                (append* (for/list ([kw (in-list keywords)])
+                           (list kw (format-id terms-stx #:source terms-stx
+                                               "%:~a" (keyword->string kw)))))]
+               ; the body is just the original syntax passed in
+               [body terms-stx]
+               ; finally, % needs to be an alias for %1, which is handled with an inner (let ...)
+               [(aliases ...)
+                (if (>= max-positional 1)
+                    `([,(datum->syntax terms-stx '% terms-stx)
+                       ,(datum->syntax terms-stx '%1 terms-stx)])
+                    '())])
+            #'(lambda (positional-arg ... keyword-arg ... . rest-arg)
+                (let (aliases ...) body)))]
+         [else
+          (with-syntax ([(fn . body) terms-stx])
+            #'((curry fn) . body))]))]))

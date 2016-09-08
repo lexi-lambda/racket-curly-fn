@@ -3,7 +3,7 @@
 @(require scribble/bnf
           scribble-code-examples
           (for-label racket/base racket/list racket/function
-                     curly-fn))
+                     curly-fn namespaced-transformer))
 
 @(define (curly-fn-examples . stuff)
    (apply code-examples
@@ -62,4 +62,8 @@ or other identifiers and have those identifiers detected by the curly shorthand.
 @defproc[(make-curly-fn-readtable [#:readtable readtable readtable? (current-readtable)]) readtable?]{
                                                                                                       
 Creates a readtable that extends @racket[readtable] to add support for reading literal function
-shorthand syntax.}
+shorthand syntax.
+
+It isn’t possible to add this to an arbitrary readtable and have it produce lambdas, since lambdas
+cannot be serialized to syntax objects. Instead, this readtable produces @tt{#%namespaced} datums,
+which are expected to be bound to @racket[#%namespaced] from @racketmodname[namespaced-transformer].}
