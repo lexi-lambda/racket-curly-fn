@@ -4,9 +4,8 @@
 (define scribblings '(["scribblings/curly-fn.scrbl"]))
 
 (define deps
-  '("base"
+  '(["base" #:version "6.1.1"]
     "rackunit-lib"))
 (define build-deps
   '("racket-doc"
-    "scribble-lib"
-    "cover"))
+    "scribble-lib"))

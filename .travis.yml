@@ -8,6 +8,7 @@ env:
   matrix:
     - RACKET_VERSION=6.1.1
     - RACKET_VERSION=6.2
+    - RACKET_VERSION=6.2.1
 
 before_install:
   - git clone https://github.com/greghendershott/travis-racket.git
@@ -16,11 +17,12 @@ before_install:
 
 install:
   - raco pkg install --deps search-auto --name curly-fn --link $TRAVIS_BUILD_DIR
+  - raco pkg install --deps search-auto cover cover-coveralls
 
 before_script:
 
 script:
-  - raco test -xp curly-fn
+  - raco test -ep curly-fn
   - raco cover -bf coveralls -d $TRAVIS_BUILD_DIR/coverage -p curly-fn
 
 after_script:
