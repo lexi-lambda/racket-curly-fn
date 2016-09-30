@@ -3,7 +3,7 @@
 (define collection 'multi)
 
 (define deps
-  '(["base" #:version "6.2"]
+  '(["base" #:version "6.3"]
     "namespaced-transformer-lib"))
 (define build-deps
   '())
